@@ -53,7 +53,7 @@ cliente agregarCliente(int iteracion){
     
     nuevo.ClienteID = iteracion;
     std::cout << "Ingrese nombre del cliente: ";    
-    nuevo.NombreCliente= (char*)malloc(sizeof(char)*30);
+    nuevo.NombreCliente= (char*)malloc(sizeof(char)*40);
     gets(nuevo.NombreCliente);//error del gets?
     nuevo.CantidadProductosAPedir = rand() % 5 + 1;
 
@@ -73,10 +73,10 @@ producto crearProducto(int j){
 
     nuevo2.ProductoID = j;
     nuevo2.Cantidad = rand() % 10 + 1;
-    posicion = rand() % 5 + 1;
+    posicion = rand() % 5;
     nuevo2.TipoProducto = (char*) malloc(sizeof(char*) * strlen(tiposProductos[posicion]));
     strcpy(nuevo2.TipoProducto, tiposProductos[posicion]);
-    nuevo2.PrecioUnitario = rand() % 91 + 10;
+    nuevo2.PrecioUnitario = (float) (rand() % 910 + 1000) / 10;
 
     return nuevo2;
 }
