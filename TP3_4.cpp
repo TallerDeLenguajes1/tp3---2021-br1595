@@ -54,7 +54,7 @@ cliente agregarCliente(int iteracion){
     nuevo.ClienteID = iteracion;
     std::cout << "Ingrese nombre del cliente: ";    
     nuevo.NombreCliente= (char*)malloc(sizeof(char)*30);
-    gets(nuevo.NombreCliente);
+    gets(nuevo.NombreCliente);//error del gets?
     nuevo.CantidadProductosAPedir = rand() % 5 + 1;
 
     nuevo.Productos = (producto *) malloc(sizeof(producto*) * nuevo.CantidadProductosAPedir);
