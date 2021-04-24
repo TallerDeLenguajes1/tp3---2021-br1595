@@ -1,113 +1,136 @@
-#include <iostream>
-#include <cstdlib>
-#include <ctime>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 #include <string.h>
 const char *tiposProductos[]={"Galletas","Snack","Cigarrillos","Caramelos","Bebidas"};
 
-typedef struct Producto {
+typedef struct Producto 
+{
     int ProductoID; //Numerado en ciclo iterativo
     int Cantidad; // entre 1 y 10
     char *TipoProducto; // Algún valor del arreglo TiposProductos
     float PrecioUnitario; // entre 10 - 100
 }producto;
 
-typedef struct Cliente {
+typedef struct Cliente 
+{
     int ClienteID; // Numerado en el ciclo iterativo
     char *NombreCliente; // Ingresado por usuario
     int CantidadProductosAPedir; // (alteatorio entre 1 y 5)
-    Producto *Productos; //El tamaño de este arreglo depende de la variable “CantidadProductosAPedir”
+    producto *Productos; //El tamaño de este arreglo depende de la variable “CantidadProductosAPedir”
 }cliente;
 
-float mostrarProductos(producto, int);
-void mostrarRecibo(cliente);
-float precioTotalProducto(producto);
-producto crearProducto(int);
-cliente agregarCliente(int);
+void agregarCliente(cliente *, int);
+void crearProducto(producto *, int);
+void mostrarRecibo(cliente *, int);
+void mostrarProductos(producto *, int);
+float precioTotalProducto(producto *);
 
-int main(){
+int main()
+{
     srand((unsigned int) time(0));
 
-    int cantidad, i;
+    int cantidad;
     cliente *clientes;
 
-    clientes = new cliente;
+    printf("Ingrese cantidad de clientes:\n");
+    fflush(stdin);
+    scanf("%d", &cantidad);
+    getchar();
+    fflush(stdin);
 
-    std::cout << "Ingrese cantidad de clientes:" << std::endl;
-    std::cin >> cantidad;
+    clientes = (cliente*)(malloc(sizeof(cliente) * cantidad));
+   
+    agregarCliente(clientes, cantidad);
 
-    for(i = 0; i < cantidad;i++ ){
-        clientes[i] = agregarCliente(i+1);
-    }
+    mostrarRecibo(clientes, cantidad);
 
-    for(i = 0; i < cantidad;i++ ){
-        mostrarRecibo(clientes[i+1]);
-    }
+    free(clientes);
+    getchar();
 
-    delete(clientes);
     return 0;
 }
 
 
-cliente agregarCliente(int iteracion){
-    cliente nuevo; 
+void agregarCliente(cliente * nuevo ,int cantidad)
+{
+    char buff[100];
+    int i;
+
+    for(i = 0; i < cantidad;i++ )
+    {    
+        (nuevo + i)->ClienteID = i + 1;
+        printf("Ingrese nombre del cliente: \n");   
+        fflush(stdin);
+
+        //gets(buff);//error del gets?        
+        scanf("%s", buff);
+        getchar();
+        fflush(stdin);
+
+        (nuevo + i)->NombreCliente= (char*)malloc(sizeof(char) * strlen(buff));
+        strcpy((nuevo + i)->NombreCliente, buff);
+        fflush(stdin);
+
+        (nuevo + i)->CantidadProductosAPedir = rand() % 5 + 1;
+
+        (nuevo + i)->Productos = (producto *) malloc(sizeof(producto*) * (nuevo + i)->CantidadProductosAPedir);
+
+        crearProducto((nuevo + i)->Productos, (nuevo + i)->CantidadProductosAPedir);
+    }
+}
+
+
+void crearProducto(producto * nuevoProducto, int cantidad)
+{
+    int posicion, x;
+
+    for(x=0; x < cantidad; x++)
+    {
+        (nuevoProducto + x)->ProductoID = x + 1;
+        (nuevoProducto + x)->Cantidad = rand() % 10 + 1;
+        posicion = rand() % 5;
+        (nuevoProducto + x)->TipoProducto = (char*) malloc(sizeof(char*) * strlen(tiposProductos[posicion]));
+        strcpy((nuevoProducto + x)->TipoProducto, tiposProductos[posicion]);
+        (nuevoProducto + x)->PrecioUnitario = (float) (rand() % 910 + 1000) / 10;
+    }
+}
+
+float precioTotalProducto(producto * prod)
+{
+    return prod->Cantidad * prod->PrecioUnitario;
+}
+
+void mostrarRecibo(cliente * clientes, int cantidad)
+{
+    int x;
+
+    for(x=0; x < cantidad; x++)
+    {
+        printf("\n\nCliente N %d",(clientes + x)->ClienteID);
+        printf("\nNombre: %s",(clientes + x)->NombreCliente);
+        printf("\nCantidad de productos: %d",(clientes + x)->CantidadProductosAPedir);
+        printf("\n\nProductos: ");
+        mostrarProductos((clientes + x)->Productos, (clientes + x)->CantidadProductosAPedir);
+    }        
+}
+
+void mostrarProductos(producto * prod, int cantidadProd)
+{
+    int x;
+    float precio, precioFinal = 0;
+
+    for(x=0; x < cantidadProd; x++)
+    {
+        printf("\nProducto N %d", x+1);
+        printf("\nCantidad: %d", (prod + x)->Cantidad);
+        printf("\nTipo: %s", (prod + x)->TipoProducto);
+        printf("\nPrecio unitario: $ %.2f", (prod + x)->PrecioUnitario);
+        precio = precioTotalProducto(prod + x);
+        precioFinal += precio;
+        printf("\nPrecio total: $ %.2f", precio);
+        printf("\n");
+    }
+    printf("\nPrecio total final: $ %.2f",precioFinal);       
     
-    nuevo.ClienteID = iteracion;
-    std::cout << "Ingrese nombre del cliente: ";    
-    nuevo.NombreCliente= (char*)malloc(sizeof(char)*40);
-    gets(nuevo.NombreCliente);//error del gets?
-    nuevo.CantidadProductosAPedir = rand() % 5 + 1;
-
-    nuevo.Productos = (producto *) malloc(sizeof(producto*) * nuevo.CantidadProductosAPedir);
-
-    for(int x=0; x < nuevo.CantidadProductosAPedir; x++){
-        nuevo.Productos[x] = crearProducto(x+1);
-    }
-
-    return nuevo;
-}
-
-
-producto crearProducto(int j){
-    producto nuevo2;
-    int posicion;
-
-    nuevo2.ProductoID = j;
-    nuevo2.Cantidad = rand() % 10 + 1;
-    posicion = rand() % 5;
-    nuevo2.TipoProducto = (char*) malloc(sizeof(char*) * strlen(tiposProductos[posicion]));
-    strcpy(nuevo2.TipoProducto, tiposProductos[posicion]);
-    nuevo2.PrecioUnitario = (float) (rand() % 910 + 1000) / 10;
-
-    return nuevo2;
-}
-
-float precioTotalProducto(producto prod){
-    return prod.Cantidad * prod.PrecioUnitario;
-}
-
-void mostrarRecibo(cliente todo){
-    float precioFinal = 0;
-
-    std::cout << "Cliente N" << todo.ClienteID << std::endl;
-    std::cout << "Nombre" << todo.NombreCliente << std::endl;
-    std::cout << "Cantidad de productos" << todo.CantidadProductosAPedir << std::endl;
-    std::cout << "Productos: " << std::endl;
-
-    for(int x=0; x < todo.CantidadProductosAPedir; x++){
-        precioFinal += mostrarProductos(todo.Productos[x], x);
-    }
-
-    std::cout << "Total a pagar: $" << precioFinal << std::endl;    
-}
-
-float mostrarProductos(producto prod, int x){
-    float precio;
-
-    std::cout << "Producto N" << x << std::endl;
-    std::cout << "Cantidad" << prod.Cantidad << std::endl;
-    std::cout << "Tipo" << prod.TipoProducto << std::endl;
-    precio = precioTotalProducto(prod);
-    std::cout << "Precio total: $" << precio << std::endl;
-
-    return precio;
 }
